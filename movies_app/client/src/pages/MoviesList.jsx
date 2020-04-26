@@ -1,16 +1,51 @@
 
 import React, { Component } from 'react'
-import ReactTable from 'react-table'
+import ReactTable from 'react-table-6'
 import apis from '../api'
 import styled from 'styled-components'
 import 'react-table-6/react-table.css'
 
 const Wrapper = styled.div`
-       padding: 0 40px 40px 40px;
+     padding: 0 40px 40px 40px
+     `
+
+const Update = styled.div`
+    color: #ef9b0f;
+    cursor: pointer;
 `
 
+const Delete = styled.div`
+color: #ff0000;
+cursor: pointer;
+`
 
-export default class MoviesList extends Component {
+class UpdateMovie extends Component{
+    updateUser = event=>{
+        event.preventDefault();
+        
+
+        window.location.href = `/movies/update/${this.props.id}`
+    }
+    render(){
+        return <Update onClick={this.updateUser}>Update</Update>
+    }
+
+
+    }
+class DeleteMovie extends Component{
+    deleteUser = event=>{
+        event.preventDefault();
+        if(window.confirm(`do you want to delete the movie ${this.props.id} permanently?`,
+        )){
+            apis.deleteMovieById(this.props.id)
+            window.location.reload()
+        }
+    }
+    render(){
+        return <Delete onClick={this.deleteUser}>Delete</Delete>
+    }
+}
+class MoviesList extends Component {
     constructor(props){
         super(props)
         this.state = {
@@ -52,14 +87,37 @@ render(){
                 accessor: 'time',
                 Cell: props=><span>{props.value.join('/')}</span>,
             },
+            {
+                Header: '',
+                accessor: '',
+                Cell: function(props) {
+                    return (
+                        <span>
+                            <DeleteMovie id={props.original._id} />
+                        </span>
+                    )
+                },
+            },
+            {
+                Header: '',
+                accessor: '',
+                Cell: function(props) {
+                    return (
+                        <span>
+                            <UpdateMovie id={props.original._id} />
+                        </span>
+                    )
+                },
+            },
+
     ]
     let showTable = true
     if(!movies.length){
         showTable = false
     }
     return (
-        <div>
-                <ReactTable 
+            <Wrapper>
+                {showTable && ( <ReactTable 
                     data={movies}
                     columns={columns}
                     loading={isLoading}
@@ -67,10 +125,12 @@ render(){
                     showPageSizeOptions={true}
                     minRows={0}
                 
-                />
-        </div>
+                />)}
+            </Wrapper>
 
     )
 }
 }
+
+export default MoviesList
 
